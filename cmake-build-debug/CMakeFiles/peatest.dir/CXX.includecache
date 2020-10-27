@@ -9,8 +9,16 @@
 C:/Users/azdro/OneDrive/Pulpit/peatest/main.cpp
 iostream
 -
-map
--
 vector
+-
+fstream
+-
+iostream
+-
+sstream
+-
+string
+-
+windows.h
 -
 

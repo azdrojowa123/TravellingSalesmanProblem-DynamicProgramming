@@ -9,22 +9,10 @@ using namespace std;
 
 #define INT_MAX 999999
 
-const int n=4;
-int dist[10][10] = {
-    {0,20,42,25},
-    {20,0,30,34},
-    {42,30,0,10},
-    {25,34,10,0}
 
-};
-int VISITED_ALL = (1<<n) -1;
-int dp[16][4];
+int  tsp(int mask,int pos, int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &visited_all, int &n, vector<vector<int>> &dp ){
 
-
-
-int  tsp(int mask,int pos, int &cost, int **previous,int **graph){
-
-  if(mask==VISITED_ALL){
+  if(mask==visited_all){
     cout<<"Return dist[pos][0]"<<endl;
     return graph[pos][0];
   }
@@ -41,7 +29,7 @@ int  tsp(int mask,int pos, int &cost, int **previous,int **graph){
 
       cout<<"Maska: "<<mask<<endl;
 
-      int newAns = dist[pos][city] + tsp( mask|(1<<city), city,cost,previous,graph);
+      int newAns = graph[pos][city] + tsp(mask|(1<<city), city,cost,previous,graph,visited_all,n,dp);
 
       cout<<"New Ans"<<newAns<<"Dla pos "<<pos<<"city "<<city<<endl;
       cout<<"Poprzednie ans: "<<ans;
@@ -84,7 +72,7 @@ vector<int> getPath(int **previous){
 }
 
 //czytanie z pliku
-void readFromFile(string s, int **graph, int &n){
+void readFromFile(string s, vector<vector<int>> &graph, int &n, vector<vector<int>> &previous, vector<vector<int>> &dp){
 
   int weight;
   ifstream myFile;
@@ -92,9 +80,10 @@ void readFromFile(string s, int **graph, int &n){
   if(myFile.is_open()){
     myFile>>n;
     for(int i=0;i<n;i++){
+        graph.push_back(vector<int>());
         for(int j=0; j < n; j++){
         myFile>>weight;
-        graph[i][j] = weight;
+        graph[i].push_back(weight);
       }
     }
   }
@@ -102,13 +91,26 @@ void readFromFile(string s, int **graph, int &n){
     cout<<"File is not read properly";
   }
   myFile.close();
+  for (int i = 0; i < n; i++) {
+    previous.push_back(vector<int>());
+    for (int j = 0; j < (1 << n); j++) {
+      previous[i].push_back(-1);
+    }
+  }
+  for (int i = 0; i < (1 << n); i++) {
+    dp.push_back(vector<int>());
+    for (int j = 0; j < n; j++) {
+      dp[i].push_back(-1);
+    }
+  }
 }
 
 
 
 int main() {
-  int **previous;
-  int **graph;
+  vector<vector<int>> previous;
+  vector<vector<int>> graph;
+  vector<vector<int>> dp;
   int n, cost, repeat, optimumCost,temp2;
   char bracket;
   string line, csvName, dataFile;
@@ -116,27 +118,6 @@ int main() {
   vector<int>solution;
   vector<int> result;
 
-  previous = new int *[n];
-  for (int i = 0; i < n; i++) {
-    previous[i] = new int[1 << n];
-  }
-
-  graph = new int *[n];
-  for (int i = 0; i < n; i++) {
-    graph[i] = new int[1 << n];
-  }
-
-  for (int i = 0; i < (1 << n); i++) {
-    for (int j = 0; j < n; j++) {
-      dp[i][j] = -1;
-    }
-  }
-
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < (1 << n); j++) {
-      previous[i][j] = -1;
-    }
-  }
 
   ofstream csvFile;
 
@@ -159,23 +140,28 @@ int main() {
       }
       istringstream stream(line);
       stream >> dataFile >> repeat >> optimumCost >>bracket; // wczytanie nazwy instancji, ilosci powtórzeń, kosztu optymalnego
-      readFromFile(dataFile, graph, n); // wypełnienie zmiennych graph oraz fullgraph danymi
+      readFromFile(dataFile, graph, n, previous, dp); // wypełnienie zmiennych graph oraz fullgraph danymi
+      int visited_all = (1<<n) -1;
       for (int i = 0; i <= n; i++) { // wczytanie ścieżki z nawiasu kwadratowego
         stream >> temp2;
         solution.push_back(temp2);
       }
       for (int j = 0; j < repeat; j++) {
-        cout << tsp(1, 0, cost, previous,graph);
-      }
+        cout << tsp(1, 0, cost, previous,graph,visited_all,n, dp);
+        csvFile.open(csvName,  std::ios::out |  std::ios::app);
+        csvFile<<"Spodziewane wyniki dla pliku: "<<tsp(1, 0, cost, previous,graph,visited_all,n,dp)<<"\n";
+        csvFile.close();
+        //result = getPath(previous);
+        //cout<<"GETPATH SIZE"<<result.size();
 
-      for (int i = 0; i < n; i++) {
+      }
+      /*for (int i = 0; i < n; i++) {
         cout << i << " ";
         for (int j = 0; j < (1 << n); j++) {
           cout << previous[i][j] << " ";
         }
         cout << endl;
-      }
-
+      }*/
     }
   }
   return 0;
