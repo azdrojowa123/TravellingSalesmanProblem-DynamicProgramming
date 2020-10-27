@@ -50,7 +50,7 @@ int  tsp(int mask,int pos, int &cost,vector<vector<int>> &previous,vector<vector
   return dp[mask][pos] = ans;
 }
 
-vector<int> getPath(int **previous){
+vector<int> getPath(vector<vector<int>> &previous){
 
   int mask = 1;
 
@@ -151,18 +151,16 @@ int main() {
         csvFile.open(csvName,  std::ios::out |  std::ios::app);
         csvFile<<"Spodziewane wyniki dla pliku: "<<tsp(1, 0, cost, previous,graph,visited_all,n,dp)<<"\n";
         csvFile.close();
-        //result = getPath(previous);
+        result = getPath(previous);
         //cout<<"GETPATH SIZE"<<result.size();
 
       }
-      /*for (int i = 0; i < n; i++) {
-        cout << i << " ";
-        for (int j = 0; j < (1 << n); j++) {
-          cout << previous[i][j] << " ";
-        }
+      cout<<"ŚCIEŻKA"<<endl;
+      for (int i = 0; i < result.size(); i++) {
+        cout << result[i] << " ";
         cout << endl;
-      }*/
-    }
-  }
+      }
+
+  }}
   return 0;
 }
