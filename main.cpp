@@ -1,6 +1,10 @@
 #include <iostream>
-#include <map>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <windows.h>
 using namespace std;
 
 #define INT_MAX 999999
@@ -11,17 +15,18 @@ int dist[10][10] = {
     {20,0,30,34},
     {42,30,0,10},
     {25,34,10,0}
+
 };
 int VISITED_ALL = (1<<n) -1;
-//int previous[4][16];
 int dp[16][4];
 
 
-int  tsp(int mask,int pos, int &cost, int **previous){
+
+int  tsp(int mask,int pos, int &cost, int **previous,int **graph){
 
   if(mask==VISITED_ALL){
     cout<<"Return dist[pos][0]"<<endl;
-    return dist[pos][0];
+    return graph[pos][0];
   }
   if(dp[mask][pos]!=-1){
     cout<<"Return dp[mask][pos] mask: "<<mask<<endl;
@@ -36,7 +41,7 @@ int  tsp(int mask,int pos, int &cost, int **previous){
 
       cout<<"Maska: "<<mask<<endl;
 
-      int newAns = dist[pos][city] + tsp( mask|(1<<city), city,cost,previous);
+      int newAns = dist[pos][city] + tsp( mask|(1<<city), city,cost,previous,graph);
 
       cout<<"New Ans"<<newAns<<"Dla pos "<<pos<<"city "<<city<<endl;
       cout<<"Poprzednie ans: "<<ans;
@@ -78,38 +83,100 @@ vector<int> getPath(int **previous){
 
 }
 
-int main(){
+//czytanie z pliku
+void readFromFile(string s, int **graph, int &n){
+
+  int weight;
+  ifstream myFile;
+  myFile.open(s);
+  if(myFile.is_open()){
+    myFile>>n;
+    for(int i=0;i<n;i++){
+        for(int j=0; j < n; j++){
+        myFile>>weight;
+        graph[i][j] = weight;
+      }
+    }
+  }
+  else{
+    cout<<"File is not read properly";
+  }
+  myFile.close();
+}
+
+
+
+int main() {
   int **previous;
+  int **graph;
+  int n, cost, repeat, optimumCost,temp2;
+  char bracket;
+  string line, csvName, dataFile;
   vector<int> route;
+  vector<int>solution;
   vector<int> result;
-  int cost;
 
   previous = new int *[n];
-  for(int i=0;i<n;i++){
-    previous[i] = new int [1<<n];
+  for (int i = 0; i < n; i++) {
+    previous[i] = new int[1 << n];
   }
 
-  for(int i=0;i<(1<<n);i++){
-    for(int j=0;j<n;j++){
+  graph = new int *[n];
+  for (int i = 0; i < n; i++) {
+    graph[i] = new int[1 << n];
+  }
+
+  for (int i = 0; i < (1 << n); i++) {
+    for (int j = 0; j < n; j++) {
       dp[i][j] = -1;
     }
   }
 
-  for(int i=0;i<n;i++){
-    for(int j=0;j<(1<<n);j++){
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < (1 << n); j++) {
       previous[i][j] = -1;
     }
   }
 
+  ofstream csvFile;
 
-  cout<<tsp(1,0,cost,previous);
+  ifstream myInitFile;
+  myInitFile.open("initialiaze.INI");
 
-  for(int i=0;i<n;i++){
-    cout<<i<<" ";
-    for(int j=0;j<(1<<n);j++){
-      cout<<previous[i][j]<<" ";
+  // wyłuskanie z ostatniej linii pliku .INI nazwy pliku wyjściowego
+  while (getline(myInitFile, line)) {
+    csvName = line;
+  }
+
+  myInitFile.close();
+  myInitFile.open("initialiaze.INI");
+
+  // ponowne otwarcie pliku
+  if (myInitFile.is_open()) {
+    while (getline(myInitFile, line)) {             // wczytanie kolejnej lini
+      if (line.find(".csv") != std::string::npos) { // sprawdzenie czy linia zawiera rozszerzenie .csv
+        break;
+      }
+      istringstream stream(line);
+      stream >> dataFile >> repeat >> optimumCost >>bracket; // wczytanie nazwy instancji, ilosci powtórzeń, kosztu optymalnego
+      readFromFile(dataFile, graph, n); // wypełnienie zmiennych graph oraz fullgraph danymi
+      for (int i = 0; i <= n; i++) { // wczytanie ścieżki z nawiasu kwadratowego
+        stream >> temp2;
+        solution.push_back(temp2);
+      }
+      for (int j = 0; j < repeat; j++) {
+        cout << tsp(1, 0, cost, previous,graph);
+      }
+
+      for (int i = 0; i < n; i++) {
+        cout << i << " ";
+        for (int j = 0; j < (1 << n); j++) {
+          cout << previous[i][j] << " ";
+        }
+        cout << endl;
+      }
+
     }
-    cout<<endl;
   }
   return 0;
 }
