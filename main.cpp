@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <windows.h>
 using namespace std;
 
 #define INT_MAX 999999
@@ -13,47 +12,51 @@ using namespace std;
 int  tsp(int mask,int pos, int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &visited_all, int &n, vector<vector<int>> &dp ){
 
   if(mask==visited_all){
-    cout<<"Return dist[pos][0]"<<endl;
+    //zwraca koszt powrotu od ostatniego elementu w ścieżce do początkowego
     return graph[pos][0];
   }
+  //jeżeli taka "droga" była już sprawdzona
   if(dp[mask][pos]!=-1){
-    cout<<"Return dp[mask][pos] mask: "<<mask<<endl;
+   // cout<<"Return dp[mask][pos] mask: "<<mask<<endl;
     return dp[mask][pos];
   }
 
   int ans = INT_MAX;
   int index =-1;
+  //rozpoczęcie przeszukania wszystkich wierzchołków
   for(int city=0;city<n;city++){
 
+    //jezeli wierzchołek nie był jeszcze odwiedzony
     if((mask&(1<<city))==0){
 
-      cout<<"Maska: "<<mask<<endl;
-
+      //cout<<"Maska: "<<mask<<endl;
+      //znalezienie kosztu od wierzchołka pos do city +  koszt do końca do końca
       int newAns = graph[pos][city] + tsp(mask|(1<<city), city,cost,previous,graph,visited_all,n,dp);
 
-      cout<<"New Ans"<<newAns<<"Dla pos "<<pos<<"city "<<city<<endl;
-      cout<<"Poprzednie ans: "<<ans;
+      //cout<<"New Ans"<<newAns<<"Dla pos "<<pos<<"city "<<city<<endl;
+      //cout<<"Poprzednie ans: "<<ans;
 
+      //jezeli nowy koszt jest mniejszy od poprzedniego to nasepuje podmiana
       if(newAns < ans){
         cost = newAns;
         index=city;
+        ans=newAns;
       }
-      ans = min(ans, newAns);
-      cout<<"Ans"<<ans<<" W iteracji dla city: "<<city<<"i pos:"<<pos<<endl;
-      cout<<mask<<endl;
+      //cout<<"Ans"<<ans<<" W iteracji dla city: "<<city<<"i pos:"<<pos<<endl;
+      //cout<<mask<<endl;
     }
 
   }
-  cout<<"dopisuje sie do dp mask:" <<mask<<"pos: "<<pos<<"ans: "<<ans<<endl;
-  cout<<"dopisuje sie do do previous mask:" <<mask<<"pos: "<<pos<<"index: "<<index<<endl;
+  //cout<<"dopisuje sie do dp mask:" <<mask<<"pos: "<<pos<<"ans: "<<ans<<endl;
+  //cout<<"dopisuje sie do do previous mask:" <<mask<<"pos: "<<pos<<"index: "<<index<<endl;
   previous[pos][mask] = index;
   return dp[mask][pos] = ans;
 }
 
+//funkcja generująca ścieżkę z vectora previous
 vector<int> getPath(vector<vector<int>> &previous){
 
   int mask = 1;
-
   vector<int>resultPath;
   int index = 0;
   while(true){
