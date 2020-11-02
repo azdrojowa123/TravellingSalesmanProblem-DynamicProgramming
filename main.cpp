@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include <sstream>
 #include <string>
 using namespace std;
@@ -9,48 +10,51 @@ using namespace std;
 #define INT_MAX 999999
 
 
-int  tsp(int mask,int pos, int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &visited_all, int &n, vector<vector<int>> &dp ){
+void tsp(int mask,int pos, int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &visited_all, int &n, vector<vector<int>> &dp ){
 
-  if(mask==visited_all){
-    //zwraca koszt powrotu od ostatniego elementu w ścieżce do początkowego
-    return graph[pos][0];
-  }
-  //jeżeli taka "droga" była już sprawdzona
-  if(dp[mask][pos]!=-1){
-   // cout<<"Return dp[mask][pos] mask: "<<mask<<endl;
-    return dp[mask][pos];
-  }
 
-  int ans = INT_MAX;
-  int index =-1;
-  //rozpoczęcie przeszukania wszystkich wierzchołków
-  for(int city=0;city<n;city++){
 
-    //jezeli wierzchołek nie był jeszcze odwiedzony
-    if((mask&(1<<city))==0){
-
-      //cout<<"Maska: "<<mask<<endl;
-      //znalezienie kosztu od wierzchołka pos do city +  koszt do końca do końca
-      int newAns = graph[pos][city] + tsp(mask|(1<<city), city,cost,previous,graph,visited_all,n,dp);
-
-      //cout<<"New Ans"<<newAns<<"Dla pos "<<pos<<"city "<<city<<endl;
-      //cout<<"Poprzednie ans: "<<ans;
-
-      //jezeli nowy koszt jest mniejszy od poprzedniego to nasepuje podmiana
-      if(newAns < ans){
-        cost = newAns;
-        index=city;
-        ans=newAns;
+  for(int maska = 1 ; maska < (1 << n-1) ; maska++ ){
+    for(int i=0 ; i<n ; i++){
+      if ((maska & (1 << i))){ // jeżeli taki wierzchołek nie ma na trasie
+        //cout<<"Taki wierzchołek startowy i "<<i<<"jest na trasie"<<endl;
+        for(int temp =0 ; temp < n-1;temp++){ //wierzchołek końcowy
+          if(!(maska & (1<<temp))){ // jeżeli takeigo końcowego nie ma na trasie
+            //cout<<"Takiego  końcowego nie ma na trasie "<<temp<<endl;
+            dp[maska|(1<<temp)][temp] = std:: min(dp[maska][i] + graph[i+1][temp+1] , dp[maska|(1<<temp)][temp]);
+            //cout<<dp[maska|(1<<temp)][temp]<<endl;
+          }
+        }
       }
-      //cout<<"Ans"<<ans<<" W iteracji dla city: "<<city<<"i pos:"<<pos<<endl;
-      //cout<<mask<<endl;
     }
-
   }
-  //cout<<"dopisuje sie do dp mask:" <<mask<<"pos: "<<pos<<"ans: "<<ans<<endl;
-  //cout<<"dopisuje sie do do previous mask:" <<mask<<"pos: "<<pos<<"index: "<<index<<endl;
-  previous[pos][mask] = index;
-  return dp[mask][pos] = ans;
+  for (int i=1 ; i << ((1<<n-1)-1) ; i++){
+    for(int j=0;j<n-1;j++){
+      cout<<"dp od i "<<i<<"od j"<<j<<" "<<dp[i][j]<<" ";
+    }
+    cout<<endl;
+  }
+
+  unsigned result = 1e9;
+  int last;
+  for (unsigned v = 0; v < (n-1); ++v) {
+    unsigned act = dp[(1 << (n-1)) - 1][v] + graph[v+1][0]; //koszt "powrotu" z wierzchołka v do wierzchołka 0
+    if (result > act) {
+      result = act;
+      last = v;
+    }
+  }
+  int nextmask = (1 << ((n-1)-1) ) - (int)pow(2,last);
+  int max = INT_MAX, newIndex;
+  for(int i=0; i<n-1 ;i++){
+    if(dp[nextmask][i] < max){
+      newIndex = i;
+      max = dp[nextmask][i];
+    }
+  }
+  cout<<"WYNIK"<<result<<endl<<endl;
+  cout<<max;
+
 }
 
 //funkcja generująca ścieżkę z vectora previous
@@ -100,11 +104,16 @@ void readFromFile(string s, vector<vector<int>> &graph, int &n, vector<vector<in
       previous[i].push_back(-1);
     }
   }
-  for (int i = 0; i < (1 << n); i++) {
+  for (int i = 0; i < ((1 << (n-1))); i++) {
     dp.push_back(vector<int>());
-    for (int j = 0; j < n; j++) {
-      dp[i].push_back(-1);
+    cout<<i<<" ";
+    for (int j = 0; j < n-1; j++) {
+      dp[i].push_back(INT_MAX);
     }
+  }
+  for(int i=0;i<n-1;i++){
+    dp[1<<i][i] = graph[0][i+1];
+    cout<<dp[1<<i][i]<<endl;
   }
 }
 
@@ -150,20 +159,21 @@ int main() {
         solution.push_back(temp2);
       }
       for (int j = 0; j < repeat; j++) {
-        cout << tsp(1, 0, cost, previous,graph,visited_all,n, dp);
-        csvFile.open(csvName,  std::ios::out |  std::ios::app);
+        tsp(1, 0, cost, previous,graph,visited_all,n, dp);
+        /*csvFile.open(csvName,  std::ios::out |  std::ios::app);
         csvFile<<"Spodziewane wyniki dla pliku: "<<tsp(1, 0, cost, previous,graph,visited_all,n,dp)<<"\n";
         csvFile.close();
         result = getPath(previous);
-        //cout<<"GETPATH SIZE"<<result.size();
+        //cout<<"GETPATH SIZE"<<result.size();*/
 
       }
-      cout<<"ŚCIEŻKA"<<endl;
+      /*cout<<"ŚCIEŻKA"<<endl;
       for (int i = 0; i < result.size(); i++) {
         cout << result[i] << " ";
-        cout << endl;
+        cout << endl;*/
       }
 
-  }}
-  return 0;
+  }return 0;
 }
+
+
