@@ -1,8 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/peatest.dir/main.cpp.obj"
-  "libpeatest.dll.a"
-  "peatest.exe"
-  "peatest.exe.manifest"
+  "CMakeFiles/peatest.dir/main.cpp.o"
+  "peatest"
   "peatest.pdb"
 )
 

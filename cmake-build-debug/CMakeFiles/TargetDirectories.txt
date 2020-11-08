@@ -1,3 +1,3 @@
-C:/Users/azdro/OneDrive/Pulpit/peatest/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/azdro/OneDrive/Pulpit/peatest/cmake-build-debug/CMakeFiles/peatest.dir
-C:/Users/azdro/OneDrive/Pulpit/peatest/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/aleksandra/Pulpit/TravellingSalesmanProblem-DynamicProgramming/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/aleksandra/Pulpit/TravellingSalesmanProblem-DynamicProgramming/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/aleksandra/Pulpit/TravellingSalesmanProblem-DynamicProgramming/cmake-build-debug/CMakeFiles/peatest.dir

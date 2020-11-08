@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/azdro/OneDrive/Pulpit/peatest/main.cpp
+/home/aleksandra/Pulpit/TravellingSalesmanProblem-DynamicProgramming/main.cpp
 iostream
 -
 vector

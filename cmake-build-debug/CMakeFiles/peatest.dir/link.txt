@@ -1,3 +1,1 @@
-"C:\Program Files\JetBrains\CLion 2019.3.5\bin\cmake\win\bin\cmake.exe" -E remove -f CMakeFiles\peatest.dir/objects.a
-C:\MinGW\bin\ar.exe cr CMakeFiles\peatest.dir/objects.a @CMakeFiles\peatest.dir\objects1.rsp
-C:\MinGW\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\peatest.dir/objects.a -Wl,--no-whole-archive  -o peatest.exe -Wl,--out-implib,libpeatest.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\peatest.dir\linklibs.rsp
+/usr/bin/c++  -g   CMakeFiles/peatest.dir/main.cpp.o  -o peatest 

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include <cmath>
 #include <sstream>
 #include <string>
 using namespace std;
@@ -20,11 +19,11 @@ void tsp(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int
 
   for(int maska = 1 ; maska < (1 << n-1) ; maska++ ){
     for(int i=0 ; i<n ; i++){
-      if ((maska & (1 << i))){ // jeżeli taki wierzchołek nie ma na trasie
-        for(int temp =0 ; temp < n-1;temp++){ //wierzchołek końcowy
+      if ((maska & (1 << i))){ // jeżeli taki wierzchołek jest na trasie
+        for(int temp =0 ; temp < n-1;temp++){ //szukamy wierzchołka którego jeszcze nie ma na trasie
           if(!(maska & (1<<temp))){ // jeżeli takeigo końcowego nie ma na trasie
-            dp[maska|(1<<temp)][temp] = std:: min(dp[maska][i] + graph[i+1][temp+1] , dp[maska|(1<<temp)][temp]);
-            if(dp[maska|(1<<temp)][temp] == (dp[maska][i] + graph[i+1][temp+1])){
+            dp[maska|(1<<temp)][temp] = min(dp[maska][i] + graph[i+1][temp+1] , dp[maska|(1<<temp)][temp]);
+            if(dp[maska|(1<<temp)][temp] == (dp[maska][i] + graph[i+1][temp+1])){ //jeżeli znależliśmy lepsze rozwiązanie należy zapisać w tablicy poprzedników
               previous[maska|(1<<temp)][temp] = i;
             }
 
@@ -36,12 +35,12 @@ void tsp(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int
 
 
   //wyliczenie która ścieżka finalnie da najlepszy result
-  unsigned result = INT_MAX;
+  int result = INT_MAX;
   int last;
-  for (unsigned v = 0; v < (n-1); ++v) {
-    unsigned act = dp[(1 << (n-1)) - 1][v] + graph[v+1][0]; //koszt "powrotu" z wierzchołka v do wierzchołka 0
-    if (result > act) {
-      result = act;
+  for (int v = 0; v < (n-1); ++v) {
+    int temp = dp[(1 << (n-1)) - 1][v] + graph[v+1][0]; //koszt "powrotu" z wierzchołka v do wierzchołka 0
+    if (result > temp) {
+      result = temp;
       last = v;
 
     }
@@ -50,49 +49,27 @@ void tsp(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int
 
   //odnajdywanie ścieżki
   path.push_back(0);
-  int previousMask = (1 << (n-1))-1;
+  int previousMask = (1 << (n-1))-1; // maska dla całego cyklu
   while(previousMask>0){
-    cout<<last;
-    path.push_back(last);
+    path.push_back(last); // dodanie do cyklu ostatnio dodanego wierzchołka
     int temp = previousMask;
-    previousMask -= (1<<last);
-    last = previous[temp][last];
+    previousMask -= (1<<last); // odjęcie od ostaniej maski ostatnio dodany wierzchołek
+    last = previous[temp][last]; // znalezeinie przed poprzednika wierzchołka
 
   }
+  //inkrementacja każdej wartości ze ściezki
   for(int i=1; i<path.size();i++){
     path[i]+=1;
   }
   path.push_back(0);
 
-  cout<<"PATH"<<result<<endl<<endl;
+  //wyświetlenie ścieżki od końca do początku
     for(int i=path.size()-1 ; i>=0 ;i--){
       cout<<path[i]<<" ";
     }
   }
 
 
-
-
-//funkcja generująca ścieżkę z vectora previous
-vector<int> getPath(vector<vector<int>> &previous){
-
-  int mask = 1;
-  vector<int>resultPath;
-  int index = 0;
-  while(true){
-    resultPath.push_back(index);
-    int nextInt = previous[index][mask];
-    if(nextInt == -1) {
-      break;
-    }
-    int nextMask = mask | (1 << nextInt);
-    mask= nextMask;
-    index = nextInt;
-  }
-  resultPath.push_back(0);
-  return resultPath;
-
-}
 
 //czytanie z pliku
 void readFromFile(string s, vector<vector<int>> &graph, int &n, vector<vector<int>> &previous, vector<vector<int>> &dp){
