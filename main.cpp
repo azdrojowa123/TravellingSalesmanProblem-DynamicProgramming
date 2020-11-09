@@ -7,19 +7,20 @@ using namespace std;
 
 #define INT_MAX 999999
 
-
-void tsp(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &visited_all, int &n, vector<vector<int>> &dp, vector<int> &path ){
-
-  for (int i = 0; i < ((1 << (n-1))); i++) {
-    dp.push_back(vector<int>());
-    for (int j = 0; j < n-1; j++) {
-      dp[i].push_back(INT_MAX);
+void incrementPath(vector<int> &path){
+    for(int i=1; i<path.size();i++){
+        path[i]+=1;
     }
-  }
+    path.push_back(0);
+
+}
+
+
+void tspDynamic(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int &n, vector<vector<int>> &dp, vector<int> &path ){
 
   for(int maska = 1 ; maska < (1 << n-1) ; maska++ ){
     for(int i=0 ; i<n ; i++){
-      if ((maska & (1 << i))){ // jeżeli taki wierzchołek jest na trasie
+      if (maska & (1 << i) ){ // jeżeli taki wierzchołek jest na trasie
         for(int temp =0 ; temp < n-1;temp++){ //szukamy wierzchołka którego jeszcze nie ma na trasie
           if(!(maska & (1<<temp))){ // jeżeli takeigo końcowego nie ma na trasie
             dp[maska|(1<<temp)][temp] = min(dp[maska][i] + graph[i+1][temp+1] , dp[maska|(1<<temp)][temp]);
@@ -58,21 +59,19 @@ void tsp(int &cost,vector<vector<int>> &previous,vector<vector<int>> &graph, int
 
   }
   //inkrementacja każdej wartości ze ściezki
-  for(int i=1; i<path.size();i++){
-    path[i]+=1;
-  }
-  path.push_back(0);
+  incrementPath(path);
 
   //wyświetlenie ścieżki od końca do początku
     for(int i=path.size()-1 ; i>=0 ;i--){
       cout<<path[i]<<" ";
     }
+    cout<<endl;
   }
 
 
 
 //czytanie z pliku
-void readFromFile(string s, vector<vector<int>> &graph, int &n, vector<vector<int>> &previous, vector<vector<int>> &dp){
+void readFromFile(string s, vector<vector<int>> &graph, int &n){
 
   int weight;
   ifstream myFile;
@@ -91,37 +90,39 @@ void readFromFile(string s, vector<vector<int>> &graph, int &n, vector<vector<in
     cout<<"File is not read properly";
   }
   myFile.close();
-  for (int i = 0; i < ((1 << (n-1))) ; i++) {
-    previous.push_back(vector<int>());
-    for (int j = 0; j <  n-1; j++) {
-      previous[i].push_back(-1);
+
+}
+
+void createVectors(vector<vector<int>> &previous, vector<vector<int>> &dp, int &n, vector<vector<int>> &graph)
+{
+    //wypełnienia wektora previous wektorami wraz z wartościami -1
+    for (int i = 0; i < ((1 << (n-1))) ; i++) {
+        previous.push_back(vector<int>());
+        for (int j = 0; j <  n-1; j++) {
+            previous[i].push_back(-1);
+        }
     }
-  }
-  for (int i = 0; i < ((1 << (n-1))); i++) {
-    dp.push_back(vector<int>());
-    for (int j = 0; j < n-1; j++) {
-      dp[i].push_back(INT_MAX);
+    //wypełnienia wektora dp wekorami wraz z wartości INT_MAX
+    for (int i = 0; i < ((1 << (n-1))); i++) {
+        dp.push_back(vector<int>());
+        for (int j = 0; j < n-1; j++) {
+            dp[i].push_back(INT_MAX);
+        }
     }
-  }
-  for(int i=0;i<n-1;i++){
-    dp[1<<i][i] = graph[0][i+1];
-  }
+    //wypełnienie tablicy dp kosztami przejścia od wierzchołka 0 do i
+    for(int i=0;i<n-1;i++){
+        dp[1<<i][i] = graph[0][i+1];
+    }
 }
 
 
-
 int main() {
-  vector<vector<int>> previous;
-  vector<vector<int>> graph;
-  vector<vector<int>> dp;
-  int n, cost, repeat, optimumCost,temp2;
+
+  int n, repeat, optimumCost,temp2;
   char bracket;
   string line, csvName, dataFile;
   vector<int> route;
   vector<int>solution;
-  vector<int> result;
-
-
   ofstream csvFile;
 
   ifstream myInitFile;
@@ -143,21 +144,26 @@ int main() {
       }
       istringstream stream(line);
       stream >> dataFile >> repeat >> optimumCost >>bracket; // wczytanie nazwy instancji, ilosci powtórzeń, kosztu optymalnego
-      readFromFile(dataFile, graph, n, previous, dp); // wypełnienie zmiennych graph oraz fullgraph danymi
-      int visited_all = (1<<n) -1;
+      vector<vector<int>> graph;
+      readFromFile(dataFile, graph, n); // wypełnienie zmiennych graph danymi
       for (int i = 0; i <= n; i++) { // wczytanie ścieżki z nawiasu kwadratowego
         stream >> temp2;
         solution.push_back(temp2);
       }
+      vector<vector<int>> previous;
+      vector<vector<int>> dp;
       for (int j = 0; j < repeat; j++) {
-        tsp(cost, previous,graph,visited_all,n, dp,result);
+        createVectors(previous,dp,n,graph); //stworzenie wektorów previous oraz dp
+        vector<int> result;
+        int cost = 0;
+        tspDynamic(cost, previous,graph,n, dp,result);
         /*csvFile.open(csvName,  std::ios::out |  std::ios::app);
         csvFile<<"Spodziewane wyniki dla pliku: "<<tsp(1, 0, cost, previous,graph,visited_all,n,dp)<<"\n";
         csvFile.close();
         result = getPath(previous);
         //cout<<"GETPATH SIZE"<<result.size();*/
-
       }
+
     }
 
   }return 0;

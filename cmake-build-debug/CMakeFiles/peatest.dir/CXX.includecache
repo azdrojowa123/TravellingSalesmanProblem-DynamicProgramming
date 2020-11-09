@@ -13,8 +13,6 @@ vector
 -
 fstream
 -
-cmath
--
 sstream
 -
 string
