@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include<chrono>
 using namespace std;
 
 #define INT_MAX 999999
@@ -46,7 +47,7 @@ void tspDynamic(int &cost,vector<vector<int>> &previous,vector<vector<int>> &gra
 
     }
   }
-  cout<<"WYNIK"<<result<<endl;
+  cost = result;
 
   //odnajdywanie ścieżki
   path.push_back(0);
@@ -115,6 +116,20 @@ void createVectors(vector<vector<int>> &previous, vector<vector<int>> &dp, int &
     }
 }
 
+//funkcja konwertująca wektor intów na string
+string printSolution(vector<int> &solution){
+    stringstream ss;
+    for(int i=0;i<solution.size();i++){
+
+        if(i != 0){
+            ss << " ";
+        }
+        ss << solution[i];
+    }
+    return ss.str();
+
+}
+
 
 int main() {
 
@@ -124,6 +139,7 @@ int main() {
   vector<int> route;
   vector<int>solution;
   ofstream csvFile;
+  typedef chrono::high_resolution_clock Clock;
 
   ifstream myInitFile;
   myInitFile.open("initialiaze.INI");
@@ -156,12 +172,19 @@ int main() {
         createVectors(previous,dp,n,graph); //stworzenie wektorów previous oraz dp
         vector<int> result;
         int cost = 0;
+        auto start = Clock::now();
         tspDynamic(cost, previous,graph,n, dp,result);
-        /*csvFile.open(csvName,  std::ios::out |  std::ios::app);
-        csvFile<<"Spodziewane wyniki dla pliku: "<<tsp(1, 0, cost, previous,graph,visited_all,n,dp)<<"\n";
-        csvFile.close();
-        result = getPath(previous);
-        //cout<<"GETPATH SIZE"<<result.size();*/
+        auto end = Clock::now();
+        if(j == 0){
+            csvFile.open(csvName,  std::ios::out |  std::ios::app);
+            csvFile<<dataFile<<","<<repeat<<","<<cost<<","<<printSolution(result)<<"\n";
+            csvFile<<std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "\n";
+            csvFile.close();
+        }else{
+            csvFile.open(csvName,  std::ios::out |  std::ios::app);
+            csvFile<<std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "\n";
+            csvFile.close();
+        }
       }
 
     }
